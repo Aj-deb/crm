@@ -78,20 +78,6 @@ export default function Settings() {
         <h1 className="text-2xl font-bold">Settings</h1>
         <div className="flex items-center justify-between my-4">
           <span className="text-lg font-medium">Dark Mode</span>
-          <button
-            onClick={() => {
-              const t = localStorage.getItem("theme") === "dark" ? "light" : "dark";
-              localStorage.setItem("theme", t);
-              if (t === "dark") {
-                document.documentElement.classList.add("dark");
-              } else {
-                document.documentElement.classList.remove("dark");
-              }
-            }}
-            className="flex items-end px-4 py-2 border rounded-lg bg-gray-100 dark:bg-gray-800"
-          >
-            {localStorage.getItem("theme") === "dark" ? "Disable" : "Enable"}
-          </button>
         </div>
 
         <button
@@ -185,7 +171,20 @@ export default function Settings() {
         <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
           <Moon size={18} /> Preferences
         </h2>
-        <p className="text-gray-600 text-sm">Dark mode coming soon.</p>
+        <p className="text-gray-600 text-sm"> <button
+            onClick={() => {
+              const t = localStorage.getItem("theme") === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", t);
+              if (t === "dark") {
+                document.documentElement.classList.add("dark");
+              } else {
+                document.documentElement.classList.remove("dark");
+              }
+            }}
+            className="flex items-end px-4 py-2 border rounded-lg bg-gray-100 dark:bg-gray-800"
+          >
+            {localStorage.getItem("theme") === "dark" ? "Disable" : "Enable"}
+          </button></p>
       </div>
     </div>
   );
