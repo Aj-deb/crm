@@ -76,9 +76,6 @@ export default function Settings() {
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Settings</h1>
-        <div className="flex items-center justify-between my-4">
-          <span className="text-lg font-medium">Dark Mode</span>
-        </div>
 
         <button
           onClick={loadProfile}
@@ -171,6 +168,7 @@ export default function Settings() {
         <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
           <Moon size={18} /> Preferences
         </h2>
+        <span className="flex text-lg font-medium">Dark Mode</span>
         <p className="text-gray-600 text-sm"> <button
             onClick={() => {
               const t = localStorage.getItem("theme") === "dark" ? "light" : "dark";
