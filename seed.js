@@ -1,7 +1,9 @@
 require("dotenv").config();
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
-const faker = require("@faker-js/faker").faker;
+const { faker } = require("@faker-js/faker");
+
+faker.locale = "en_IN";
 
 const User = require("./models/User");
 const Lead = require("./models/Lead");
@@ -9,47 +11,106 @@ const Customer = require("./models/Customer");
 
 const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/crm_test";
 
+// -----------------------------
+// 🚀 Connect DB
+// -----------------------------
 const connectDB = async () => {
-  await mongoose.connect(MONGO_URI);
-  console.log("✅ MongoDB connected");
+  try {
+    await mongoose.connect(MONGO_URI);
+    console.log("✅ MongoDB Connected");
+  } catch (err) {
+    console.error("❌ DB Connection Error:", err);
+    process.exit(1);
+  }
 };
 
-// 🧩 Random helper functions
+// -----------------------------
+// 🎲 Helpers
+// -----------------------------
 const randomFrom = (arr) => arr[Math.floor(Math.random() * arr.length)];
 const randomBool = () => Math.random() < 0.5;
 
-// 🎯 Main Seeder
-const seedData = async () => {
+// Indian Names List
+const indianNames = [
+  "Aarav", "Vivaan", "Aditya", "Vihaan", "Krishna", "Kiaan",
+  "Arjun", "Aryan", "Ishaan", "Rohan", "Kunal", "Kabir",
+
+  "Ananya", "Aadhya", "Diya", "Saanvi", "Myra", "Ira",
+  "Aarohi", "Kashish", "Niharika", "Prisha", "Navya", "Riya",
+
+  "Simran Kaur", "Jaspreet Kaur", "Harpreet Singh", "Manish Sharma",
+  "Rahul Verma", "Sagar Yadav", "Neha Gupta", "Karan Gill",
+];
+
+// Indian Companies
+const indianCompanies = [
+  "Tata Consultancy Services",
+  "Infosys",
+  "Wipro",
+  "HCL Technologies",
+  "Reliance Industries",
+  "Adani Group",
+  "Mahindra & Mahindra",
+  "Maruti Suzuki",
+  "HDFC Bank",
+  "ICICI Bank",
+  "Tech Mahindra",
+];
+
+// Indian Phone Number
+const indianPhone = () =>
+  `+91${faker.number.int({ min: 6000000000, max: 9999999999 })}`;
+
+// Indian email (100% unique)
+const indianEmail = (name) => {
+  const clean = name.toLowerCase().replace(/ /g, ".");
+  const timestamp = Date.now().toString().slice(-5);
+  const rand = faker.number.int({ min: 100, max: 999 });
+  return `${clean}.${timestamp}${rand}@gmail.com`;
+};
+
+
+// -----------------------------
+// 🌱 Seeder
+// -----------------------------
+const seed = async () => {
   await connectDB();
-  console.log("🧹 Cleaning old data...");
-  await Promise.all([
-    User.deleteMany(),
-    Lead.deleteMany(),
-    Customer.deleteMany(),
-  ]);
 
-  // 🧠 Step 1: Users
-  console.log("👥 Creating users...");
+  console.log("\n🧹 Clearing old data...");
+  await User.deleteMany();
+  await Lead.deleteMany();
+  await Customer.deleteMany();
+
+  // -----------------------------
+  // 👤 1. Create Users
+  // -----------------------------
+  console.log("👥 Creating Indian Users...");
+
   const roles = ["admin", "manager", "sales", "support"];
-  const userList = [];
-
   const passwordHash = await bcrypt.hash("123456", 10);
 
-  for (let i = 0; i < 40; i++) {
-    userList.push({
-      name: faker.person.fullName(),
-      email: faker.internet.email().toLowerCase(),
+  const usersData = Array.from({ length: 40 }).map(() => {
+    const name = randomFrom(indianNames);
+    return {
+      name,
+      email: indianEmail(name),
       password: passwordHash,
       role: randomFrom(roles),
       status: randomBool() ? "active" : "inactive",
-    });
-  }
+    };
+  });
 
-  const users = await User.insertMany(userList);
-  console.log(`✅ ${users.length} users created`);
+  const users = await User.insertMany(usersData);
+  const activeUsers = users.filter((u) => u.status === "active");
 
-  // 🧩 Step 2: Leads
-  console.log("📋 Creating leads...");
+  console.log(`➡️ ${users.length} Indian users created`);
+
+  // -----------------------------
+  // 📋 2. Create Leads
+  // -----------------------------
+  console.log("\n📋 Creating Indian Leads...");
+
+  // Allowed by YOUR schema
   const sources = [
     "Website",
     "Referral",
@@ -57,58 +118,59 @@ const seedData = async () => {
     "Advertisement",
     "Email Campaign",
   ];
+
   const priorities = ["High", "Medium", "Low"];
   const ratings = ["Hot", "Warm", "Cold"];
 
-  const leadsList = [];
+  const leadsData = [];
 
   for (let i = 0; i < 500; i++) {
-    const assignedTo = randomFrom(users.filter((u) => u.status === "active"));
-    const isConverted = Math.random() < 0.25; // 25% conversion chance
+    const name = randomFrom(indianNames);
+    const converted = Math.random() < 0.25;
 
-    leadsList.push({
-      name: faker.person.fullName(),
-      email: faker.internet.email().toLowerCase(),
-      phone: faker.phone.number(),
-      company: faker.company.name(),
+    leadsData.push({
+      name,
+      email: indianEmail(name),
+      phone: indianPhone(),
+      company: randomFrom(indianCompanies),
       source: randomFrom(sources),
       priority: randomFrom(priorities),
       rating: randomFrom(ratings),
       score: faker.number.int({ min: 30, max: 90 }),
-      status: isConverted ? "Converted" : "New",
-      assignedTo: assignedTo._id,
+      status: converted ? "Converted" : "New",
+      assignedTo: randomFrom(activeUsers)._id,
       createdBy: randomFrom(users)._id,
     });
   }
 
-  const leads = await Lead.insertMany(leadsList);
-  console.log(`✅ ${leads.length} leads created`);
+  const leads = await Lead.insertMany(leadsData);
+  console.log(`➡️ ${leads.length} Indian leads created`);
 
-  // 🧩 Step 3: Customers
-  console.log("💼 Creating customers...");
+  // -----------------------------
+  // 💼 3. Create Customers
+  // -----------------------------
+  console.log("\n💼 Creating customers...");
+
   const convertedLeads = leads.filter((l) => l.status === "Converted");
-  const customersList = [];
 
-  for (let i = 0; i < convertedLeads.length; i++) {
-    const lead = convertedLeads[i];
-    customersList.push({
-      name: lead.name,
-      email: lead.email,
-      phone: lead.phone,
-      company: lead.company,
-      source: lead.source,
-      createdFrom: lead._id,
-    });
-  }
+  const customersData = convertedLeads.map((lead) => ({
+    name: lead.name,
+    email: lead.email,
+    phone: lead.phone,
+    company: lead.company,
+    source: lead.source,
+    createdFrom: lead._id,
+  }));
 
-  const customers = await Customer.insertMany(customersList);
-  console.log(`✅ ${customers.length} customers created`);
+  const customers = await Customer.insertMany(customersData);
+  console.log(`➡️ ${customers.length} Indian customers created`);
 
-  console.log("🎉 Seeding complete!");
+  console.log("\n🎉 SEEDING COMPLETE WITH INDIAN DATA!");
   mongoose.connection.close();
 };
 
-seedData().catch((err) => {
-  console.error("❌ Seed error:", err);
+// Run Seeder
+seed().catch((err) => {
+  console.error("❌ Seed Error:", err.message);
   mongoose.connection.close();
 });

@@ -7,7 +7,7 @@ import Layout from "./components/Layout";
 // Pages
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
-import Leads from "./pages/Leads";
+import Leads from "./pages/leads";
 import Customers from "./pages/Customers";
 import Analytics from "./pages/Analytics";
 import Reports from "./pages/Reports";

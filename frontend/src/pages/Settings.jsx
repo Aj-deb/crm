@@ -76,6 +76,24 @@ export default function Settings() {
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Settings</h1>
+        <div className="flex items-center justify-between my-4">
+          <span className="text-lg font-medium">Dark Mode</span>
+          <button
+            onClick={() => {
+              const t = localStorage.getItem("theme") === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", t);
+              if (t === "dark") {
+                document.documentElement.classList.add("dark");
+              } else {
+                document.documentElement.classList.remove("dark");
+              }
+            }}
+            className="flex items-end px-4 py-2 border rounded-lg bg-gray-100 dark:bg-gray-800"
+          >
+            {localStorage.getItem("theme") === "dark" ? "Disable" : "Enable"}
+          </button>
+        </div>
+
         <button
           onClick={loadProfile}
           className="flex items-center gap-1 bg-gray-200 px-3 py-1.5 rounded hover:bg-gray-300"
