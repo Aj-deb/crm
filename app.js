@@ -21,6 +21,7 @@ app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
 
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -29,6 +30,7 @@ app.use('/api/customers', customerRoutes);
 app.use("/api/analytics", analyticsRoutes); // 
 app.use("/api/report", reportRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+
 
 
 
